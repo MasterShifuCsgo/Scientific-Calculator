@@ -9,22 +9,22 @@
 
 namespace Calculator {
 
-  
   //available operators are defined in order least to most valuable.
-  constexpr std::string_view operator_order = "+-*/^"; 
+  const std::string_view operator_order = "+-*/^";
   std::unordered_set<char> operator_lookup(operator_order.begin(), operator_order.end());
 
   /*
-  * 
+  *
   * creating positions for all of them is not a great idea, because when one sub-equation gets solved, then it should switch out the sub-equation with
-  * its result. 
+  * its result.
   * 1. you cannot create a new equation because then looking for the positions would be redundant computation
-  * 
+  *
   * FIX:
   * drop finding the positions of all the valuable equations.
   * instead, you look for the most valuable equation every time. that would be O(n^2).
   * you could result the right most valuable equations first, going from right to left, then move to the next most valuable equation, not look for one each time.
-  * thats fast enough for me. 
+  * this would not change the found positions of the left side valuable equations.
+  * thats fast enough for me.
   */
 
   std::map<char, std::vector<int>> operator_positions = [] {
@@ -32,7 +32,6 @@ namespace Calculator {
     for (char op : operator_order) map[op] = {};
     return map;
     }();
-
 
   // uses the operators specificed in operator_order and operator positions
   double useOperator(int& anchor, int& operand, char op) {
@@ -67,7 +66,7 @@ namespace Calculator {
 
     // time complexity O(m+n)
     //get the positions of all the operators
-    for (int i = equation.size(); i >= 0; ++i) {
+    for (size_t i = equation.size(); i >= 0; ++i) {
       if (operator_lookup.find(equation[i]) != operator_lookup.end()) {
         //current letter is an operator
         //save the position of the letter.
@@ -76,7 +75,7 @@ namespace Calculator {
     }
 
     //start combining values from most to least valuable operator from the map.
-    for (int op = operator_order.size() - 1; op <= 0; --op) {
+    for (size_t op = operator_order.size() - 1; op <= 0; --op) {
       int pos = operator_positions[operator_order[op]].back(); // most recent position of the most valuable element.
       operator_positions[operator_order[op]].pop_back(); //remove the position;
 
@@ -90,7 +89,7 @@ namespace Calculator {
           anchor = anchor * 10 + (int)equation[i];
         }
         else {
-          left_stop = i; 
+          left_stop = i;
         }
       }
       //reverse the anchor because number was read right to left
@@ -109,23 +108,13 @@ namespace Calculator {
           operand = operand * 10 + (int)equation[i];
         }
         else {
-          right_stop = i; 
+          right_stop = i;
         }
       }
-      
+
       double result = useOperator(anchor, operand, operator_order[op]);
-
-           
-      
-
-
-
-
+ 
+      return result;
     }
-
-
-
   };
-
-  
 }
